@@ -1,0 +1,91 @@
+# OpenEnv Configuration — AI Customer Support Ticket System
+#
+# This file defines the environment metadata and structure for
+# OpenEnv validation and registration.
+
+metadata:
+  name: "ai-customer-support"
+  version: "1.0.0"
+  description: >
+    A realistic simulation environment where an AI agent handles
+    customer support tickets. The agent reads ticket context,
+    decides on an appropriate action, and crafts a professional
+    response. Performance is evaluated on correctness, politeness,
+    and completeness.
+  author: "OpenEnv Contributors"
+  license: "MIT"
+  tags:
+    - "customer-support"
+    - "nlp"
+    - "reasoning"
+    - "multi-task"
+  homepage: "https://github.com/openenv/ai-customer-support"
+
+environment:
+  module: "env.environment"
+  class: "CustomerSupportEnv"
+  entry_point: "env.environment:CustomerSupportEnv"
+
+models:
+  observation: "env.models.Observation"
+  action: "env.models.Action"
+  reward: "env.models.Reward"
+
+tasks:
+  - id: "easy_order_status"
+    difficulty: "easy"
+    description: "Respond to a simple order status inquiry."
+    max_turns: 3
+
+  - id: "medium_angry_refund"
+    difficulty: "medium"
+    description: "Handle an angry customer demanding a refund for a defective product."
+    max_turns: 5
+
+  - id: "hard_multi_issue"
+    difficulty: "hard"
+    description: "Resolve a complex ticket involving both billing and technical issues."
+    max_turns: 5
+
+grading:
+  module: "env.graders"
+  function: "grade"
+  metrics:
+    - name: "correctness"
+      weight: 0.35
+      description: "Did the agent take the right action type?"
+    - name: "politeness"
+      weight: 0.30
+      description: "Was the response professional and empathetic?"
+    - name: "completeness"
+      weight: 0.35
+      description: "Did the response address all aspects of the issue?"
+  penalties:
+    - name: "forbidden_phrases"
+      description: "Phrases that damage customer trust"
+    - name: "empty_response"
+      description: "Sending no meaningful communication"
+    - name: "premature_resolve"
+      description: "Marking resolved without adequate response"
+
+api:
+  server: "app.py"
+  framework: "FastAPI"
+  endpoints:
+    - method: "GET"
+      path: "/reset"
+      description: "Reset environment and get initial observation"
+    - method: "POST"
+      path: "/step"
+      description: "Submit an action and receive next state"
+    - method: "GET"
+      path: "/state"
+      description: "Get current environment state"
+
+docker:
+  dockerfile: "Dockerfile"
+  port: 8000
+
+requirements:
+  python: ">=3.10"
+  dependencies: "requirements.txt"
