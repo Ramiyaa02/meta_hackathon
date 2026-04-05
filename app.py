@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from models import SQLAction, SQLObservation, Reward, SQLState
 from pydantic import BaseModel
 import random
+import gradio as gr          # <-- added
 
 class StepRequest(BaseModel):
     generated_sql: str
@@ -183,6 +184,97 @@ async def get_questions():
             "difficulty": q_data["task"].split("_")[0],
         }
     return {"questions": questions}
+
+
+# ============================================================================
+# Gradio UI (additional, no impact on existing endpoints)
+# ============================================================================
+
+async def grade_query_ui(question_id: str, sql_query: str):
+    """Gradio function to grade a SQL query."""
+    if not sql_query.strip():
+        return "⚠️ Please enter a SQL query."
+
+    try:
+        # Reset environment with selected question
+        obs = env.reset(question_id=question_id)
+        # Create action
+        action = SQLAction(query=sql_query)
+        # Step
+        obs, reward_score, done, info = env.step(action)
+        breakdown = info.get("breakdown", {})
+        feedback = obs.query_feedback or ""
+
+        result = f"""
+### Results for task `{question_id}`: {obs.question}
+
+| Metric | Score |
+|--------|-------|
+| **Reward** | **{reward_score:.3f}** |
+| Correctness | {breakdown.get('correctness', 0):.2f} |
+| Efficiency | {breakdown.get('efficiency', 0):.2f} |
+| Safety | {breakdown.get('safety', 0):.2f} |
+
+**Feedback:** {feedback}
+
+**Execution info:** {info.get('execution_time_ms', 0):.2f} ms, rows returned: {obs.actual_row_count or 0}
+"""
+        return result
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+# Create Gradio interface
+with gr.Blocks(title="SQL Query Grader", theme=gr.themes.Soft()) as demo:
+    gr.Markdown("# 🐘 SQL Query Generation Environment")
+    gr.Markdown("Select a task, write an SQL query, and see how well it performs on correctness, efficiency, and safety.")
+    
+    with gr.Row():
+        with gr.Column(scale=1):
+            task_dropdown = gr.Dropdown(
+                choices=["q1", "q2", "q3", "q4", "q5"],
+                label="Task",
+                value="q1"
+            )
+            # Show task description dynamically
+            task_desc = gr.Markdown("**Task description will appear here**")
+        with gr.Column(scale=2):
+            sql_input = gr.Textbox(
+                label="SQL Query",
+                placeholder="SELECT ...",
+                lines=8,
+                value="SELECT id, name, email, city FROM customers WHERE city = 'New York'"
+            )
+            submit_btn = gr.Button("Grade Query", variant="primary")
+    output = gr.Markdown(label="Results")
+
+    # Update task description when dropdown changes
+    def update_task_desc(question_id):
+        desc = env._questions.get(question_id, {}).get("text", "Unknown task")
+        return f"**Task:** {desc}"
+    
+    task_dropdown.change(fn=update_task_desc, inputs=task_dropdown, outputs=task_desc)
+    
+    # Grade on button click
+    submit_btn.click(
+        fn=grade_query_ui,
+        inputs=[task_dropdown, sql_input],
+        outputs=output
+    )
+    
+    # Example queries
+    gr.Markdown("### Example Queries")
+    gr.Examples(
+        examples=[
+            ["q1", "SELECT * FROM customers WHERE city = 'New York'"],
+            ["q2", "SELECT p.name, SUM(oi.quantity * oi.unit_price) as total_sales FROM products p JOIN order_items oi ON p.id = oi.product_id GROUP BY p.name"],
+            ["q5", "SELECT p.id, p.name FROM products p WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.product_id = p.id)"],
+        ],
+        inputs=[task_dropdown, sql_input],
+        label="Try these"
+    )
+
+# Mount Gradio app at path "/gradio"
+app = gr.mount_gradio_app(app, demo, path="/gradio")
 
 
 @app.on_event("shutdown")
