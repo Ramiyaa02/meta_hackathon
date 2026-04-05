@@ -7,25 +7,14 @@ and programmatic access.
 
 from __future__ import annotations
 
-from typing import Any, Dict
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import sys
-from pathlib import Path
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from models import SQLAction, SQLObservation, Reward, SQLState
 from pydantic import BaseModel
 import random
-import gradio as gr          # <-- added
 
-class StepRequest(BaseModel):
-    generated_sql: str
 from sql_query_environment import SQLQueryEnv
+from models import SQLAction, SQLObservation, Reward, SQLState
 
 
 # ============================================================================
@@ -53,30 +42,13 @@ app.add_middleware(
 # Global environment instance
 env = SQLQueryEnv(db_path=":memory:")
 
+class StepRequest(BaseModel):
+    generated_sql: str
+
 
 # ============================================================================
 # Endpoints
 # ============================================================================
-
-@app.get("/metadata")
-async def metadata():
-    """OpenEnv metadata."""
-    return {
-        "name": "sql_query_gen",
-        "description": "SQL Query Generation OpenEnv",
-        "version": "1.0.0"
-    }
-
-@app.get("/schema")
-async def schema():
-    """OpenEnv schemas."""
-    from pydantic import BaseModel
-    from models import SQLAction, SQLObservation, SQLState
-    return {
-        "action": SQLAction.model_json_schema(),
-        "observation": SQLObservation.model_json_schema(),
-        "state": SQLState.model_json_schema()
-    }
 
 @app.get("/")
 async def root():
@@ -88,6 +60,7 @@ async def root():
         "endpoints": [
             "GET  /reset?question_id=<id>",
             "POST /step",
+            "POST /step_openenv",
             "GET  /state",
             "GET  /health",
             "GET  /docs",
@@ -103,19 +76,13 @@ async def health():
 
 @app.get("/reset")
 async def reset(question_id: str = "q1"):
-    """Reset environment with a new question.
-    
-    Args:
-        question_id: One of q1-q5 (order status, total sales, etc.)
-    
-    Returns:
-        Initial observation with question and schema
-    """
+    """Reset environment with a specific question (GET)."""
     try:
         obs = env.reset(question_id=question_id)
         return JSONResponse(content=obs.model_dump(mode="json"))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @app.post("/reset")
 async def reset_openenv():
@@ -128,31 +95,21 @@ async def reset_openenv():
 
 @app.post("/step")
 async def step(action: SQLAction):
-    """Submit a SQL query and receive reward.
-    
-    Args:
-        action: SQLAction with query and optional reasoning
-    
-    Returns:
-        Observation, reward, done, and info dict
-    """
+    """Submit a SQL query and receive reward (OpenAI‑compatible)."""
     try:
-        obs, reward, done, info = env.step(action)
-        
+        obs, reward_float, done, info = env.step(action)
+        # Return the same structure as the original step endpoint
         return JSONResponse(
             content={
                 "observation": obs.model_dump(mode="json"),
-                "reward": {
-                    "score": reward.score,
-                    "breakdown": reward.breakdown.model_dump(mode="json"),
-                    "feedback": reward.feedback,
-                },
+                "reward": reward_float,
                 "done": done,
                 "info": info,
             }
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/step_openenv")
 async def step_openenv(request: StepRequest):
@@ -162,7 +119,7 @@ async def step_openenv(request: StepRequest):
     return {
         "reward": reward_float,
         "done": done,
-        "info": info
+        "info": info,
     }
 
 
@@ -186,101 +143,11 @@ async def get_questions():
     return {"questions": questions}
 
 
-# ============================================================================
-# Gradio UI (additional, no impact on existing endpoints)
-# ============================================================================
-
-async def grade_query_ui(question_id: str, sql_query: str):
-    """Gradio function to grade a SQL query."""
-    if not sql_query.strip():
-        return "⚠️ Please enter a SQL query."
-
-    try:
-        # Reset environment with selected question
-        obs = env.reset(question_id=question_id)
-        # Create action
-        action = SQLAction(query=sql_query)
-        # Step
-        obs, reward_score, done, info = env.step(action)
-        breakdown = info.get("breakdown", {})
-        feedback = obs.query_feedback or ""
-
-        result = f"""
-### Results for task `{question_id}`: {obs.question}
-
-| Metric | Score |
-|--------|-------|
-| **Reward** | **{reward_score:.3f}** |
-| Correctness | {breakdown.get('correctness', 0):.2f} |
-| Efficiency | {breakdown.get('efficiency', 0):.2f} |
-| Safety | {breakdown.get('safety', 0):.2f} |
-
-**Feedback:** {feedback}
-
-**Execution info:** {info.get('execution_time_ms', 0):.2f} ms, rows returned: {obs.actual_row_count or 0}
-"""
-        return result
-    except Exception as e:
-        return f"❌ Error: {str(e)}"
-
-# Create Gradio interface
-with gr.Blocks(title="SQL Query Grader", theme=gr.themes.Soft()) as demo:
-    gr.Markdown("# 🐘 SQL Query Generation Environment")
-    gr.Markdown("Select a task, write an SQL query, and see how well it performs on correctness, efficiency, and safety.")
-    
-    with gr.Row():
-        with gr.Column(scale=1):
-            task_dropdown = gr.Dropdown(
-                choices=["q1", "q2", "q3", "q4", "q5"],
-                label="Task",
-                value="q1"
-            )
-            # Show task description dynamically
-            task_desc = gr.Markdown("**Task description will appear here**")
-        with gr.Column(scale=2):
-            sql_input = gr.Textbox(
-                label="SQL Query",
-                placeholder="SELECT ...",
-                lines=8,
-                value="SELECT id, name, email, city FROM customers WHERE city = 'New York'"
-            )
-            submit_btn = gr.Button("Grade Query", variant="primary")
-    output = gr.Markdown(label="Results")
-
-    # Update task description when dropdown changes
-    def update_task_desc(question_id):
-        desc = env._questions.get(question_id, {}).get("text", "Unknown task")
-        return f"**Task:** {desc}"
-    
-    task_dropdown.change(fn=update_task_desc, inputs=task_dropdown, outputs=task_desc)
-    
-    # Grade on button click
-    submit_btn.click(
-        fn=grade_query_ui,
-        inputs=[task_dropdown, sql_input],
-        outputs=output
-    )
-    
-    # Example queries
-    gr.Markdown("### Example Queries")
-    gr.Examples(
-        examples=[
-            ["q1", "SELECT * FROM customers WHERE city = 'New York'"],
-            ["q2", "SELECT p.name, SUM(oi.quantity * oi.unit_price) as total_sales FROM products p JOIN order_items oi ON p.id = oi.product_id GROUP BY p.name"],
-            ["q5", "SELECT p.id, p.name FROM products p WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.product_id = p.id)"],
-        ],
-        inputs=[task_dropdown, sql_input],
-        label="Try these"
-    )
-
-# Mount Gradio app at path "/gradio"
-app = gr.mount_gradio_app(app, demo, path="/gradio")
-
-
 @app.on_event("shutdown")
 async def shutdown():
     """Clean up on shutdown."""
     env.close()
+
 
 if __name__ == "__main__":
     import uvicorn
