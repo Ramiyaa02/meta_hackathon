@@ -3,7 +3,7 @@
 __version__ = "1.0.0"
 __author__ = "OpenEnv Contributors"
 
-from server.sql_query_environment import SQLQueryEnv
+from sql_query_environment import SQLQueryEnv
 from models import SQLAction, SQLObservation, Reward, SQLState
 
 __all__ = [
