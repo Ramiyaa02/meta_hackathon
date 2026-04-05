@@ -14,7 +14,7 @@ COPY __init__.py ./
 COPY client.py ./
 
 # Install dependencies including gradio
-RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic httpx aiosqlite sqlparse openenv-core gradio
+RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic httpx aiosqlite sqlparse openenv-core 
 
 EXPOSE 7860
 
