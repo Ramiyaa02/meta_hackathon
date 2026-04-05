@@ -57,6 +57,26 @@ env = SQLQueryEnv(db_path=":memory:")
 # Endpoints
 # ============================================================================
 
+@app.get("/metadata")
+async def metadata():
+    """OpenEnv metadata."""
+    return {
+        "name": "sql_query_gen",
+        "description": "SQL Query Generation OpenEnv",
+        "version": "1.0.0"
+    }
+
+@app.get("/schema")
+async def schema():
+    """OpenEnv schemas."""
+    from pydantic import BaseModel
+    from models import SQLAction, SQLObservation, SQLState
+    return {
+        "action": SQLAction.model_json_schema(),
+        "observation": SQLObservation.model_json_schema(),
+        "state": SQLState.model_json_schema()
+    }
+
 @app.get("/")
 async def root():
     """Root endpoint with API info."""
@@ -77,7 +97,7 @@ async def root():
 @app.get("/health")
 async def health():
     """Health check."""
-    return {"status": "ok", "service": "sql-query-gen"}
+    return {"status": "healthy"}
 
 
 @app.get("/reset")
@@ -169,3 +189,7 @@ async def get_questions():
 async def shutdown():
     """Clean up on shutdown."""
     env.close()
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
