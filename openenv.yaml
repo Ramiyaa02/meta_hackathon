@@ -30,9 +30,9 @@ spec_compliance: true
 
 # Environment interface
 environment:
-  module: "server.sql_query_environment"
+  module: "sql_query_environment"
   class: "SQLQueryEnv"
-  entry_point: "server.sql_query_environment:SQLQueryEnv"
+  entry_point: "sql_query_environment:SQLQueryEnv"
   interface:
     - method: "reset"
       args: ["question_id (str, optional)"]
