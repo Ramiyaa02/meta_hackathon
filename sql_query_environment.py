@@ -171,18 +171,6 @@ class SQLQueryEnv:
         self.cursor.executescript(data_sql)
         self.conn.commit()
 
-    def _get_schema_elements(self):
-        """Return known tables and columns from the database schema."""
-        tables = {"customers", "products", "orders", "order_items", "categories"}
-        columns = {
-            "customers": {"id", "name", "email", "city", "country", "created_at"},
-            "products": {"id", "name", "category", "price", "stock"},
-            "orders": {"id", "customer_id", "total", "order_date", "status"},
-            "order_items": {"id", "order_id", "product_id", "quantity", "unit_price"},
-            "categories": {"id", "name", "description"},
-        }
-        return tables, columns
-
     def _load_sample_questions(self) -> None:
         """Load sample questions for testing."""
         self._questions = {
@@ -280,6 +268,10 @@ class SQLQueryEnv:
         reward_obj = self._grade_query(query)
         reward_score = reward_obj.score
         self._cumulative_reward += reward_score
+        
+        # Return: (observation, reward_obj_for_feedback, reward_float_for_rl, done, info)
+        # Actually keep it simple: (observation, reward_float, done, info)
+        # And put reward details in info and observation
         
         # Execute query to get results
         execution_info = self._execute_query(query)
@@ -467,10 +459,6 @@ INDEXES: ix_customers_city, ix_orders_customer_id, ix_order_items_order_id, ix_o
         else:
             feedback_parts.append("✗ Query may have safety issues")
         
-        # Add hallucination feedback if any
-        if hasattr(self, '_last_hallucinations') and self._last_hallucinations:
-            feedback_parts.append(f"✗ References non-existent table/column: {', '.join(self._last_hallucinations)}")
-        
         feedback = " | ".join(feedback_parts)
         
         return Reward(
@@ -515,13 +503,12 @@ INDEXES: ix_customers_city, ix_orders_customer_id, ix_order_items_order_id, ix_o
         return min(1.0, max(0.0, score))
 
     def _score_safety(self, query: str) -> float:
-        """Score query safety (20% of reward) with hallucination penalty.
+        """Score query safety (20% of reward).
         
         Heuristics:
         - No DROP/DELETE/INSERT/UPDATE: +0.5
         - Uses parameterized style (no string concat): +0.3
         - Handles NULL cases: +0.2
-        - Penalises non-existent tables/columns: -0.3 (hallucination)
         """
         score = 0.0
         query_upper = query.upper()
@@ -540,36 +527,6 @@ INDEXES: ix_customers_city, ix_orders_customer_id, ix_order_items_order_id, ix_o
         # COALESCE or IFNULL for NULL handling
         if "COALESCE" in query_upper or "IFNULL" in query_upper or "IS NULL" in query_upper:
             score += 0.2
-        
-        # ----- Schema hallucination penalty -----
-        known_tables, known_columns = self._get_schema_elements()
-        hallucinated = []
-        
-        # Find potential table names (words after FROM/JOIN)
-        potential_tables = set(re.findall(r'\b([a-z_][a-z0-9_]*)\b', query.lower()))
-        sql_keywords = {"select", "from", "where", "join", "left", "right", "inner", "outer",
-                        "on", "and", "or", "not", "in", "exists", "as", "order", "by", "group",
-                        "limit", "offset", "union", "distinct", "count", "sum", "avg", "max", "min"}
-        for tok in potential_tables:
-            if tok not in known_tables and tok not in sql_keywords:
-                hallucinated.append(tok)
-        
-        # Also check column names (basic: words before FROM)
-        from_match = re.search(r'\bfrom\b', query.lower())
-        if from_match:
-            before_from = query.lower()[:from_match.start()]
-            potential_cols = set(re.findall(r'\b([a-z_][a-z0-9_]*)\b', before_from))
-            for col in potential_cols:
-                if col not in [c for cols in known_columns.values() for c in cols] and col not in sql_keywords:
-                    if col not in hallucinated:
-                        hallucinated.append(col)
-        
-        if hallucinated:
-            # Penalise safety score (max -0.3)
-            score -= min(0.3, 0.1 * len(hallucinated))
-            self._last_hallucinations = hallucinated
-        else:
-            self._last_hallucinations = []
         
         return min(1.0, max(0.0, score))
 
