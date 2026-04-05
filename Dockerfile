@@ -13,8 +13,8 @@ COPY inference.py ./
 COPY __init__.py ./
 COPY client.py ./
 
-# Install dependencies directly (no editable install needed)
-RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic httpx aiosqlite sqlparse openenv-core
+# Install dependencies including gradio
+RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic httpx aiosqlite sqlparse openenv-core gradio
 
 EXPOSE 7860
 
