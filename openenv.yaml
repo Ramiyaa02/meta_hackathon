@@ -1,0 +1,159 @@
+# OpenEnv Configuration - SQL Query Generation Environment
+# Real-world task: Generate optimized SQL queries from natural language
+#
+# This environment trains LLMs to convert English descriptions into
+# executable SQL queries with deterministic reward (correctness + efficiency + safety)
+
+name: sql_query_gen
+metadata:
+  name: "sql_query_gen"
+  version: "1.0.0"
+  description: >
+    A production RL environment where agents learn to generate SQL queries
+    from natural language descriptions. The agent reads a text question,
+    formulates a SQL query, and receives a reward based on:
+    - Correctness (does it run? does it return right results?)
+    - Efficiency (good query plan? uses indexes?)
+    - Safety (guards against SQL injection? handles nulls?)
+  author: "OpenEnv Contributors"
+  license: "MIT"
+  tags:
+    - "nlp-to-sql"
+    - "code-generation"
+    - "optimization"
+    - "real-world"
+    - "deterministic-reward"
+  homepage: "https://github.com/meta-pytorch/OpenEnv"
+
+spec_version: "1.0.0"
+spec_compliance: true
+
+# Environment interface
+environment:
+  module: "server.sql_query_environment"
+  class: "SQLQueryEnv"
+  entry_point: "server.sql_query_environment:SQLQueryEnv"
+  interface:
+    - method: "reset"
+      args: ["question_id (str, optional)"]
+      returns: "SQLObservation"
+      description: "Reset environment with a new question, return initial observation"
+    - method: "step"
+      args: ["action (SQLAction)"]
+      returns: "(SQLObservation, reward (float), done (bool), info (dict))"
+      description: "Submit SQL query, receive reward and environment feedback"
+    - method: "state"
+      returns: "dict"
+      description: "Return current environment state"
+
+# Task definitions
+tasks:
+  - id: "easy_select"
+    name: "Simple SELECT"
+    description: "Basic single-table query with WHERE clause"
+    difficulty: "easy"
+    max_turns: 1
+    example_question: "Find all customers from New York"
+    example_table: "customers (id, name, city, country)"
+    reward_distribution: "Normal - 0.6-0.9 for good queries"
+
+  - id: "medium_join"
+    name: "Multi-table JOIN"
+    description: "Query requiring 2-3 table joins with aggregation"
+    difficulty: "medium"
+    max_turns: 1
+    example_question: "Show total sales per product category"
+    example_tables: "orders, products, categories"
+    reward_distribution: "Wide - 0.3-1.0 depending on join efficiency"
+
+  - id: "hard_complex"
+    name: "Complex Multi-Join"
+    description: "Advanced query with subqueries, CTE, window functions"
+    difficulty: "hard"
+    max_turns: 1
+    example_question: "Rank customers by total lifetime value with running average"
+    example_tables: "customers, orders, products, order_items"
+    reward_distribution: "Sparse - 0.0-1.0 (many wrong approaches)"
+
+# Grading configuration
+grading:
+  metrics:
+    - name: "correctness"
+      weight: 0.50
+      description: "Does the query execute and return correct results?"
+      range: [0.0, 1.0]
+    - name: "efficiency"
+      weight: 0.30
+      description: "Is the query optimized (uses indexes, minimal scans)?"
+      range: [0.0, 1.0]
+    - name: "safety"
+      weight: 0.20
+      description: "Is the query safe from injection and edge cases?"
+      range: [0.0, 1.0]
+
+# Reward function
+reward:
+  type: "weighted"
+  formula: "0.5*correctness + 0.3*efficiency + 0.2*safety"
+  range: [0.0, 1.0]
+  partial_credit: true
+  description: "Continuous reward signal for each query submission"
+
+# Data configuration
+data:
+  database_engine: "sqlite"
+  schema_location: "server/schema.sql"
+  sample_data_location: "server/sample_data.sql"
+  sample_questions_location: "server/sample_questions.json"
+  tables:
+    - name: "customers"
+      columns: ["id", "name", "email", "city", "country", "created_at"]
+    - name: "products"
+      columns: ["id", "name", "category", "price", "stock"]
+    - name: "orders"
+      columns: ["id", "customer_id", "total", "order_date", "status"]
+    - name: "order_items"
+      columns: ["id", "order_id", "product_id", "quantity", "unit_price"]
+    - name: "categories"
+      columns: ["id", "name", "description"]
+
+# Deployment
+deployment:
+  framework: "fastapi"
+  base_image: "python:3.11-slim"
+  dockerfile: "Dockerfile" # At project root
+  port: 8000
+  endpoints:
+    - path: "/reset"
+      method: "GET"
+      params: ["question_id (optional)"]
+      description: "Start new episode"
+    - path: "/step"
+      method: "POST"
+      body: "SQLAction (query, reasoning)"
+      description: "Submit query action"
+    - path: "/state"
+      method: "GET"
+      description: "Get current state"
+    - path: "/health"
+      method: "GET"
+      description: "Health check"
+    - path: "/docs"
+      method: "GET"
+      description: "API documentation (Swagger UI)"
+    - path: "/web"
+      method: "GET"
+      description: "Web interface"
+
+# Hugging Face Spaces configuration
+huggingface:
+  sdk: "docker"
+  app_port: 8000
+  base_path: "/web"
+  env_variables:
+    - name: "HF_TOKEN"
+      description: "Hugging Face API token"
+      required: false
+    - name: "DEMO_MODE"
+      description: "Run with sample data only"
+      default: "true"
