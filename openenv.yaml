@@ -148,8 +148,8 @@ deployment:
 # Hugging Face Spaces configuration
 huggingface:
   sdk: "docker"
-  app_port: 8000
-  base_path: "/web"
+  app_port: 7860
+  base_path: "/"
   env_variables:
     - name: "HF_TOKEN"
       description: "Hugging Face API token"
