@@ -40,3 +40,23 @@ Reward = 0.5×correctness + 0.3×efficiency + 0.2×safety, clamped to [0,1].
 pip install -r requirements.txt
 python client.py # interactive demo
 uvicorn app:app --reload # start server at http://localhost:7860
+Inference (baseline)
+Bashexport HF_TOKEN=your_hf_token
+export ENV_URL=https://ramiyaa-sql_query_gen.hf.space
+python inference.py
+Docker
+Bashdocker build -t sql_query_gen .
+docker run -p 8000:8000 sql_query_gen
+Baseline Scores
+Using Qwen/Qwen2.5-72B-Instruct via HF router:
+TaskAverage Rewardq10.87q20.90q30.84q40.87q50.80Overall0.86
+API Endpoints
+
+POST /reset – start new episode
+POST /step_openenv – submit SQL query
+GET /state – current environment state
+GET /health – health check
+GET /docs – Swagger UI
+
+License
+MIT
