@@ -122,7 +122,7 @@ deployment:
   framework: "fastapi"
   base_image: "python:3.11-slim"
   dockerfile: "Dockerfile" # At project root
-  port: 7860
+  port: 8000
   endpoints:
     - path: "/reset"
       method: "GET"
@@ -148,7 +148,7 @@ deployment:
 # Hugging Face Spaces configuration
 huggingface:
   sdk: "docker"
-  app_port: 7860
+  app_port: 8000
   base_path: "/web"
   env_variables:
     - name: "HF_TOKEN"
