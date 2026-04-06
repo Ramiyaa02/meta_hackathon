@@ -21,7 +21,7 @@ if not HF_TOKEN:
     print("ERROR: HF_TOKEN not set", file=sys.stderr)
     sys.exit(1)
 
-ENV_URL = os.getenv("ENV_URL", "https://ramiyaa-sql_query_gen.hf.space")
+ENV_URL = os.getenv("ENV_URL", "https://ramiyaa-sql-query-gen.hf.space")
 BENCHMARK = "sql-query-gen"
 MAX_STEPS = 1
 MAX_TOTAL_REWARD = 1.0
