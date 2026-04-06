@@ -24,7 +24,7 @@ import random
 
 class StepRequest(BaseModel):
     generated_sql: str
-from server.sql_query_environment import SQLQueryEnv
+from sql_query_environment import SQLQueryEnv
 
 
 # ============================================================================
