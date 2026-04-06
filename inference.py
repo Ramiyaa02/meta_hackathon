@@ -30,6 +30,8 @@ TASKS = [
     {"id": "q1", "text": "Find all customers from New York"},
     {"id": "q2", "text": "Show the total sales per product"},
     {"id": "q3", "text": "Rank customers by total lifetime value"},
+    {"id": "q4", "text": "List all orders from 2024 with customer details"},
+    {"id": "q5", "text": "Find products that have never been ordered"},
 ]
 
 # ----------------------------------------------------------------------
