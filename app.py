@@ -1,4 +1,4 @@
-  """
+"""
 FastAPI server for SQL Query Generation OpenEnv.
 
 Exposes the environment over HTTP for Hugging Face Spaces deployment
