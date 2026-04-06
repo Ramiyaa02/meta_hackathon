@@ -1,7 +1,6 @@
 
 ---
 
-### 2. Replace your **Dockerfile** completely:
 
 ```dockerfile
 FROM python:3.11-slim
