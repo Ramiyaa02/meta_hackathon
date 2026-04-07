@@ -182,6 +182,27 @@ class SQLQueryEnv:
                 "min_rows": 0,
                 "max_rows": 5,
             },
+            "q6": {
+                "text": "Running total of sales per customer",
+                "task": "hard_window",
+                "expected_columns": ["customer_id", "customer_name", "order_date", "order_total", "running_total"],
+                "min_rows": 1,
+                "max_rows": 30,
+            },
+            "q7": {
+                "text": "Customers who ordered every product category",
+                "task": "hard_relational",
+                "expected_columns": ["customer_id", "customer_name", "category_count"],
+                "min_rows": 0,
+                "max_rows": 10,
+            },
+            "q8": {
+                "text": "7-day moving average of daily sales",
+                "task": "hard_timeseries",
+                "expected_columns": ["order_date", "daily_sales", "moving_avg_7day"],
+                "min_rows": 1,
+                "max_rows": 30,
+            },
         }
 
     def reset(self, question_id: Optional[str] = None) -> SQLObservation:

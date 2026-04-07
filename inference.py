@@ -32,6 +32,9 @@ TASKS = [
     {"id": "q3", "text": "Rank customers by total lifetime value"},
     {"id": "q4", "text": "List all orders from 2024 with customer details"},
     {"id": "q5", "text": "Find products that have never been ordered"},
+    {"id": "q6", "text": "Running total of sales per customer"},
+    {"id": "q7", "text": "Customers who ordered every product category"},
+    {"id": "q8", "text": "7-day moving average of daily sales"},
 ]
 
 # ----------------------------------------------------------------------
