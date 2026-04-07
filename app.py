@@ -87,6 +87,7 @@ async def root():
             "GET  /state",
             "GET  /health",
             "GET  /docs",
+            "GET  /demo", 
         ],
     }
 
