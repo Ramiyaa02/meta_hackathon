@@ -105,7 +105,7 @@ async def reset(question_id: str = "q1"):
 
 @app.post("/reset")
 async def reset_openenv():
-    q_ids = ["q1", "q2", "q3", "q4", "q5"]
+    q_ids = ["q1", "q2", "q3", "q4", "q5","q6","q7","q8"]
     q_id = random.choice(q_ids)
     obs = env.reset(question_id=q_id)
     return obs.model_dump()
