@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "requires-python": ">=3.11",
+  "dependencies": [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "httpx",
+    "aiosqlite",
+    "sqlparse",
+    "gradio"
+  ]
+}
