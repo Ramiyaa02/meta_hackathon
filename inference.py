@@ -91,10 +91,10 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     done_str = str(done).lower()
     print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_str} error={error_str}", flush=True)
 
-def log_end(success: bool, steps: int, score: float, rewards: List[float]):
+def log_end(success: bool, steps: int, rewards: List[float]):
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
     success_str = str(success).lower()
-    print(f"[END] success={success_str} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+    print(f"[END] success={success_str} steps={steps} rewards={rewards_str}", flush=True)
 
 # ----------------------------------------------------------------------
 # Main loop
@@ -115,10 +115,10 @@ async def main():
             error = None
 
             log_step(step=1, action=sql, reward=reward, done=done, error=error)
-            log_end(success=True, steps=1, score=reward, rewards=[reward])
+            log_end(success=True, steps=1, rewards=[reward])
         except Exception as e:
             log_step(step=1, action="", reward=0.0, done=True, error=str(e))
-            log_end(success=False, steps=1, score=0.0, rewards=[0.0])
+            log_end(success=False, steps=1, rewards=[0.0])
 
 if __name__ == "__main__":
     asyncio.run(main())
