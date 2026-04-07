@@ -102,13 +102,24 @@ async def reset(question_id: str = "q1"):
         return JSONResponse(content=obs.model_dump(mode="json"))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import traceback
+        error_msg = f"Reset failed: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @app.post("/reset")
 async def reset_openenv():
-    q_ids = ["q1", "q2", "q3", "q4", "q5","q6","q7","q8"]
-    q_id = random.choice(q_ids)
-    obs = env.reset(question_id=q_id)
-    return obs.model_dump()
+    try:
+        q_ids = ["q1", "q2", "q3", "q4", "q5","q6","q7","q8"]
+        q_id = random.choice(q_ids)
+        obs = env.reset(question_id=q_id)
+        return JSONResponse(content=obs.model_dump(mode="json"))
+    except Exception as e:
+        import traceback
+        error_msg = f"Reset failed: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @app.post("/step")
 async def step(action: SQLAction):
