@@ -15,7 +15,7 @@ COPY __init__.py ./
 COPY client.py ./
 
 # Install dependencies
-RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic httpx aiosqlite sqlparse openenv-core
+RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic httpx aiosqlite sqlparse openenv-core gradio
 
 EXPOSE 8000
 
