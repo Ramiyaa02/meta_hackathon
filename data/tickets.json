@@ -1,0 +1,184 @@
+[
+  {
+    "ticket_id": "TKT-1001",
+    "subject": "Where is my order?",
+    "priority": "low",
+    "status": "open",
+    "customer_name": "Alice Johnson",
+    "customer_email": "alice@example.com",
+    "order_id": "ORD-88432",
+    "product_name": "Wireless Bluetooth Headphones",
+    "category": "order_status",
+    "messages": [
+      {
+        "role": "customer",
+        "content": "Hi, I placed an order (ORD-88432) for Wireless Bluetooth Headphones about a week ago and I still haven't received it. Can you please check the status? Thanks!",
+        "timestamp": "2025-06-10T09:15:00Z"
+      }
+    ],
+    "metadata": {
+      "order_status": "shipped",
+      "tracking_number": "1Z999AA10123456784",
+      "carrier": "UPS",
+      "estimated_delivery": "2025-06-12",
+      "shipped_date": "2025-06-07"
+    }
+  },
+  {
+    "ticket_id": "TKT-2045",
+    "subject": "DEFECTIVE PRODUCT - I want my money back NOW!",
+    "priority": "high",
+    "status": "open",
+    "customer_name": "Robert Chen",
+    "customer_email": "r.chen@example.com",
+    "order_id": "ORD-77210",
+    "product_name": "Smart Home Security Camera",
+    "category": "billing",
+    "messages": [
+      {
+        "role": "customer",
+        "content": "I am absolutely furious! I bought your Smart Home Security Camera (ORD-77210) two weeks ago and it's COMPLETELY broken. The video feed freezes every 30 seconds, the night vision doesn't work at all, and the mobile app crashes constantly. This is unacceptable for a $199 product! I want a FULL refund immediately or I'm filing a chargeback and leaving negative reviews everywhere. This is the worst product I've ever purchased.",
+        "timestamp": "2025-06-10T14:30:00Z"
+      },
+      {
+        "role": "customer",
+        "content": "I've been waiting for 2 hours for a response! Are you even reading my messages?! I'm done waiting. REFUND. NOW.",
+        "timestamp": "2025-06-10T16:45:00Z"
+      }
+    ],
+    "metadata": {
+      "purchase_date": "2025-05-27",
+      "price_paid": 199.99,
+      "warranty_status": "active",
+      "return_eligible": true,
+      "previous_tickets": 0
+    }
+  },
+  {
+    "ticket_id": "TKT-3078",
+    "subject": "Double charged AND app not working — need help ASAP",
+    "priority": "critical",
+    "status": "open",
+    "customer_name": "Maria Garcia",
+    "customer_email": "m.garcia@example.com",
+    "order_id": "ORD-99102",
+    "product_name": "Premium Cloud Storage Subscription",
+    "category": "billing",
+    "messages": [
+      {
+        "role": "customer",
+        "content": "Hello, I have TWO serious issues that need immediate attention. \n\n1) BILLING ISSUE: I was charged $49.99 TWICE on June 5th for my Premium Cloud Storage subscription (ORD-99102). My bank statement clearly shows two identical charges. I need one of these charges reversed ASAP — that's almost $100 taken from my account incorrectly!\n\n2) TECHNICAL ISSUE: On top of that, your desktop app (v3.2.1) has completely stopped syncing my files since last week. I have important work documents that I need access to and the app just shows 'Sync Failed — Error Code 503' every time. I've tried restarting the app and my computer multiple times.\n\nI've been a loyal customer for 3 years and this is completely unacceptable. Please fix BOTH issues. I expect a response today.",
+        "timestamp": "2025-06-10T08:00:00Z"
+      },
+      {
+        "role": "customer",
+        "content": "It's been 6 hours. I'm now considering switching to a competitor. Please address both the billing and the sync issue.",
+        "timestamp": "2025-06-10T14:00:00Z"
+      },
+      {
+        "role": "customer",
+        "content": "I also want to mention that I tried reinstalling the app but the sync issue persists. The error log shows: '[ERROR] SyncEngine: connection timeout after 30s — server unreachable at api.cloudstore.example.com'. Please look into this.",
+        "timestamp": "2025-06-10T15:30:00Z"
+      }
+    ],
+    "metadata": {
+      "billing": {
+        "charge_amount": 49.99,
+        "charge_date": "2025-06-05",
+        "charge_count": 2,
+        "subscription_plan": "Premium Cloud Storage",
+        "billing_cycle": "monthly",
+        "customer_since": "2022-03-15"
+      },
+      "technical": {
+        "app_version": "3.2.1",
+        "error_code": 503,
+        "error_message": "Sync Failed — connection timeout after 30s",
+        "affected_endpoint": "api.cloudstore.example.com",
+        "known_issue": true,
+        "workaround": "Use web interface at app.cloudstore.example.com",
+        "fix_eta": "v3.2.2 patch expected 2025-06-15"
+      },
+      "account_tier": "premium",
+      "loyalty_years": 3
+    }
+  },
+  {
+    "ticket_id": "TKT-4012",
+    "subject": "Cannot reset my password",
+    "priority": "medium",
+    "status": "open",
+    "customer_name": "James Wilson",
+    "customer_email": "j.wilson@example.com",
+    "order_id": null,
+    "product_name": "CloudNotes Pro",
+    "category": "technical",
+    "messages": [
+      {
+        "role": "customer",
+        "content": "I've been trying to reset my password for CloudNotes Pro for the past 30 minutes. The reset email never arrives. I've checked spam, tried 3 different email addresses, and nothing works. Can someone help?",
+        "timestamp": "2025-06-11T10:00:00Z"
+      }
+    ],
+    "metadata": {
+      "account_email": "j.wilson@example.com",
+      "last_login": "2025-05-20",
+      "reset_attempts": 5,
+      "known_issue": false
+    }
+  },
+  {
+    "ticket_id": "TKT-5023",
+    "subject": "Subscription cancellation request",
+    "priority": "medium",
+    "status": "open",
+    "customer_name": "Sarah Kim",
+    "customer_email": "s.kim@example.com",
+    "order_id": "ORD-55100",
+    "product_name": "DataInsight Analytics Suite",
+    "category": "billing",
+    "messages": [
+      {
+        "role": "customer",
+        "content": "Hi, I'd like to cancel my DataInsight Analytics Suite subscription. I haven't used it in 2 months and I'm being charged $79.99/month. Please cancel before my next billing date (July 1st). My subscription ID is SUB-2023-AK.",
+        "timestamp": "2025-06-11T11:30:00Z"
+      }
+    ],
+    "metadata": {
+      "subscription_id": "SUB-2023-AK",
+      "plan": "DataInsight Analytics Suite",
+      "monthly_cost": 79.99,
+      "next_billing_date": "2025-07-01",
+      "cancellation_allowed": true,
+      "loyalty_offers_available": ["30% discount for 3 months", "downgrade to Basic plan at $29.99"]
+    }
+  },
+  {
+    "ticket_id": "TKT-6089",
+    "subject": "Item arrived damaged — requesting replacement",
+    "priority": "high",
+    "status": "open",
+    "customer_name": "David Park",
+    "customer_email": "d.park@example.com",
+    "order_id": "ORD-66789",
+    "product_name": "4K Ultra HD Monitor 27-inch",
+    "category": "returns",
+    "messages": [
+      {
+        "role": "customer",
+        "content": "My 4K Ultra HD Monitor (ORD-66789) arrived today with a cracked screen. The outer box was fine but the internal packaging was clearly insufficient. I've attached photos of the damage. I'd like a replacement sent as soon as possible — I need this for work. Order was placed on June 1st.",
+        "timestamp": "2025-06-10T17:00:00Z"
+      }
+    ],
+    "metadata": {
+      "order_date": "2025-06-01",
+      "delivery_date": "2025-06-10",
+      "price_paid": 449.99,
+      "warranty_status": "active",
+      "damage_reported": true,
+      "photos_attached": true,
+      "return_eligible": true,
+      "replacement_stock_available": true
+    }
+  }
+]
