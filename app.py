@@ -19,13 +19,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models import SQLAction, SQLObservation, Reward, SQLState
+from sql_query_environment import SQLQueryEnv
 from pydantic import BaseModel
 import random
 import gradio as gr
 
 class StepRequest(BaseModel):
     generated_sql: str
-from sql_query_environment import SQLQueryEnv
 
 
 # ============================================================================
